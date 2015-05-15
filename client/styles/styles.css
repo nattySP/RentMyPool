@@ -115,7 +115,7 @@ body{
 
 
 .viewPort {
-    overflow: hidden;
+    overflow: auto;
 }
 
 .nav-menu{

@@ -8,7 +8,7 @@ var ListEntry = React.createClass({
   render: function () {
     var listing; 
     if (Object.keys(this.props.listing).length){
-      listing = this.props.listing.name +' - ' + this.props.listing.address + ' - ' + this.props.listing.price + ' - ' + new Date(this.props.listing.date).toDateString().slice(3);
+      listing = this.props.listing.name +' - ' + this.props.listing.address + ' - ' + this.props.listing.price + ' - ' + new Date(this.props.listing.startDate).toDateString().slice(3)+ ' - ' + new Date(this.props.listing.endDate).toDateString().slice(3);
     } else {
       listing = 'Sorry, no listings match that criteria';
     }
@@ -60,14 +60,29 @@ var Listings = React.createClass({
     }
   },
 
+  convertDate: function(date) {
+    var dateString = date.split('/');
+    dateString.push(dateString.shift());
+    dateString.push(dateString.shift());
+    var dateInt = parseInt(dateString.join(''));
+    return dateInt
+  },
+
   handleFilterChange: function (data) {
     var newEntries =  this.state.allData;
-    if(data.date)
+    if(!!data.date){
+      var component = this; 
+      var targetDate = this.convertDate(data.date);
       newEntries = newEntries.filter(function (item, index) {
-        if(item.date && item.date.includes(data.date))
-          return true;
-        else return false;
+        if (component){
+          var startDate = component.convertDate(item.startDate);
+          var endDate = component.convertDate(item.endDate)
+          if(targetDate >= startDate && targetDate <= endDate)
+            return true;
+          else return false;
+        }
       });
+    }
 
     if(data.location)
       newEntries = newEntries.filter(function (item, index) {
@@ -207,9 +222,8 @@ var Booking = React.createClass({
       noDetails: true,
       rental: {},
       reviews: [],
-      errors: ''
+      errors: '',
       avgRating: 0,
-      reviews: []
     };
   },
 
@@ -352,10 +366,10 @@ var Booking = React.createClass({
 
 
       var bookingButton;
-      if(this.state.rental.listing.booker_id === null) {
-        bookingButton = <button className="btn-link" onClick={this.handleBooking}>Book now</button>;
+      if(this.state.rental.listing.booker_id) {
+        bookingButton = <button className="button">BOOKED</button>;
       } else {
-          bookingButton = <button className="button">BOOKED</button>;
+        bookingButton = <button className="btn-link" onClick={this.handleBooking}>Book now</button>;
       }
 
 
@@ -366,7 +380,8 @@ var Booking = React.createClass({
           {avgRating}
           <h3>{this.state.rental.listing.address}</h3>
           <img className="poolImg" src={this.state.rental.listing.img}/> 
-          <h3>{new Date(this.state.rental.listing.date).toDateString().slice(4)}</h3>
+          <h3>Available from {new Date(this.state.rental.listing.startDate).toDateString().slice(4)}
+            to {new Date(this.state.rental.listing.endDate).toDateString().slice(4)} </h3>
           <h4 className="h4book">{formatedPrice}/hour</h4>
           <h4 className="h4book"> Pool Features </h4>
           <p className="h4book"> {poolFeatures} </p>

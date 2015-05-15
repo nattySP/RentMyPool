@@ -9,6 +9,7 @@ var _postListing = function (load) {
     xhr.open('post', '/uploadimg', true);
     xhr.onload= function (data) {
       load.file = xhr.responseText;
+      console.log('LISTING DATA: ', data)
       $.ajax({
         url: "/list",
         method: "POST",

@@ -8,6 +8,8 @@ var itemSchema = mongoose.Schema({
   poolType: String, 
   calendar: {},
   rules: [],
+  startDate: String,
+  endDate: String,
   date: "", //change to an array for date ranges
   user_id: {type: String, required: true},
   img : {type: String, required: false},

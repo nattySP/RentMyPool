@@ -156,10 +156,13 @@ exports.addItemToListings = function(req, res) {
   console.log( req.body);
   utils.checkUser(req, res, function() {
     var itemInfo = req.body;
+    console.log('listing req.body: ', req.body);
     var newPool = new Item({ 
       name : itemInfo.name, 
       address : itemInfo.address,
       price : itemInfo.price,
+      startDate: itemInfo.startDate,
+      endDate: itemInfo.endDate,
       date: itemInfo.date,
       poolType: itemInfo.poolType,
       user_id: itemInfo.user_id,
