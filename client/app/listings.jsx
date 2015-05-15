@@ -7,6 +7,8 @@ var ListContent = React.createClass({
     name: 'Name',
     address : 'Address',
     price : 'Price (per hour)',
+    startDate: 'Start Date',
+    endDate: 'End Date',
     date: "Date",
     poolType: [],
     user_id: "",
@@ -54,6 +56,42 @@ var ListContent = React.createClass({
     });
   },
 
+  handleStartDate: function() {
+    var component = this; 
+    $( "#from" ).datepicker({
+      defaultDate: "+1w",
+      changeMonth: true,
+      numberOfMonths: 3,
+      onClose: function( selectedDate ) {
+        $( "#to" ).datepicker( "option", "minDate", selectedDate );
+        component.setState({
+          startDate: selectedDate
+        }, function(){
+          console.log("startDate: ", component.state.startDate);
+        })
+      }
+    });
+
+  },
+
+  handleEndDate: function() {
+    var component = this; 
+    $( "#to" ).datepicker({
+      defaultDate: "+1w",
+      changeMonth: true,
+      numberOfMonths: 3,
+      onClose: function( selectedDate ) {
+        $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+        component.setState({
+          endDate: selectedDate
+        }, function(){
+          console.log("endDate: ", component.state.endDate);
+        })
+      }
+    });
+
+  },
+
   handleFetchUser: function (data) {
     this.setState({
       user_id: data._id
@@ -68,7 +106,9 @@ var ListContent = React.createClass({
         name: $form.name.value,
         address: $form.address.value,
         price: $form.price.value,
-        date: $form.date.value,
+        // startDate: $form.startDate.value,
+        // endDate: $form.endDate.value,
+        // date: $form.date.value,
         file: $form.userPhoto.files[0]
       }, 
         function () {
@@ -102,6 +142,12 @@ var ListContent = React.createClass({
           <br />
           <br />
           <input className="listingInput" name="price" placeholder={this.state.price+'*'} type="text" />
+          <br />
+          <br />
+          <input className="listingInput" id="from" name="startDate" onClick={this.handleStartDate} placeholder={this.state.startDate+'*'} type="text" />
+          <br />
+          <br />
+          <input className="listingInput" id="to" name="endDate" onClick={this.handleEndDate} placeholder={this.state.endDate+'*'} type="text" />
           <br />
           <br />
           <input className="listingInput" name="date" id="datepicker" placeholder={this.state.date+'*'} type="text" />
