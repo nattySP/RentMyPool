@@ -9,7 +9,6 @@ var ListContent = React.createClass({
     price : 'Price (per hour)',
     startDate: 'Start Date',
     endDate: 'End Date',
-    date: "Date",
     poolType: [],
     user_id: "",
     error: ""
@@ -106,9 +105,6 @@ var ListContent = React.createClass({
         name: $form.name.value,
         address: $form.address.value,
         price: $form.price.value,
-        // startDate: $form.startDate.value,
-        // endDate: $form.endDate.value,
-        // date: $form.date.value,
         file: $form.userPhoto.files[0]
       }, 
         function () {
@@ -148,9 +144,6 @@ var ListContent = React.createClass({
           <br />
           <br />
           <input className="listingInput" id="to" name="endDate" onClick={this.handleEndDate} placeholder={this.state.endDate+'*'} type="text" />
-          <br />
-          <br />
-          <input className="listingInput" name="date" id="datepicker" placeholder={this.state.date+'*'} type="text" />
           <br />
           <br />
           <div className="listingInput">*

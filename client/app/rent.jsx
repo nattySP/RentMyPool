@@ -224,6 +224,7 @@ var Booking = React.createClass({
       reviews: [],
       errors: '',
       avgRating: 0,
+      date: new Date().toDateString().slice(4)
     };
   },
 
@@ -233,6 +234,8 @@ var Booking = React.createClass({
     RentStore.addListener(RentConstants.REVIEW_SUBMITTED, this.refreshReviews);
     RentStore.addListener(RentConstants.NEW_REVIEW, this.handleNewReviews);
     RentStore.addRemoveDetailsListener(this.removeDetails);
+    $( "#bookDate" ).datepicker()
+      .on("input change", this.handleBookDate);
   },
 
   componentWillUnmount: function () {
@@ -257,6 +260,18 @@ var Booking = React.createClass({
         //get reviews
         RentActions.fetchReviews(this.state.rental.listing.user_id);
     });
+  },
+
+  handleBookDate: function(e) {
+    var date = e.target.value;
+    this.setState({
+      date: date
+    },
+      function () {
+        RentActions.filterChange(this.state);
+        RentActions.removeDetails(); 
+      }
+    );
   },
 
   handleNewReviews: function () {
@@ -385,6 +400,8 @@ var Booking = React.createClass({
           <h4 className="h4book">{formatedPrice}/hour</h4>
           <h4 className="h4book"> Pool Features </h4>
           <p className="h4book"> {poolFeatures} </p>
+          <input type="text" id="bookDate" name="date" placeholder="Date" />
+          //put  a datepicker here, dont allow bookingButton to be clicked unless date is selected
           {bookingButton}
           <br />
           <br />
