@@ -32,7 +32,7 @@ var _postBooking = function (date, id) {
 };
 
 var _cancelBooking = function(data) {
-  console.log('making request...');
+  console.log('cancelBooking Data: ', data);
   return new Promise(function(resolve, reject) {
     $.ajax({
       url: "/deleteBooking",
@@ -249,6 +249,10 @@ RentDispatcher.register(function (action) {
         console.log('error', err);
       });
   };
+
+  actions[RentConstants.BOOK_DATE] = function() {
+    RentStore.emit(RentConstants.BOOK_DATE, action.load);
+  }
 
   actions[action.type]();
 });

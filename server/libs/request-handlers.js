@@ -79,15 +79,16 @@ exports.getReviews = function(req, res) {
 
 exports.book = function(req, res) {
   var info = req.body;
+  console.log('exports.book req.body: ', info);
   utils.checkUser(req, res, function() {
     if(info.date.length === 10) {
       Item.findOne({_id : info._id}, function(err, pool) {
         if(!err) {
           var user = req.session.user;
 
-          pool.booker_id = user._id;
+          // pool.booker_id = user._id;
           pool.calendar = pool.calendar || {};
-          pool.calendar[info.date] = true;
+          pool.calendar[info.date] = user._id;
           pool.markModified('calendar');
 
           pool.save(function(err, pool) {
@@ -96,7 +97,20 @@ exports.book = function(req, res) {
               res.status(500).send({errorMessage : 'error with saving booking'});
             }
             else {
-              res.status(302).send('Payment');
+              pool.date = info.date; 
+              User.findOne({_id : user._id}, function(err, user) {
+                if (!err) {
+                  user.bookings.push(pool);
+                  user.save(function(err, user) {
+                    if (err) {
+                      console.log('error in saving booking to user');
+                      res.status(500).send({errorMessage : 'error saving booking to user'});
+                    } else {
+                      res.status(302).send('Payment');
+                    }
+                  })
+                }
+              })
             }
           });
         }
@@ -116,18 +130,29 @@ exports.book = function(req, res) {
 exports.cancelBooking = function(req, res) {
   console.log('cancelBooking');
   console.log(req.body);
-  Item.findByIdAndUpdate(
-    req.body.booking,
-    {"booker_id": null},
-    {safe: true, upsert: true},
+  Item.findById(
+    req.body.booking._id,
     function(err, model) {
       if(err) {
         console.log(err);
         res.status(500).send();
       }
-      console.log(model);
-      res.status(201).send();
+
+      var copyCalendar = model.calendar; 
+      delete copyCalendar[req.body.booking.date];
+      console.log('copyCalendar: ', copyCalendar); 
+      // Item.findByIdandUpdate(
+      //   req.body.booking._id,
+      //   {"calendar" : copyCalendar},
+      //   function (err, model) {
+      //     if (err) {
+      //       console.log(err);
+      //       res.status(500).send(); 
+      //     }
+      //     res.status(201).send();
+      //   })
     });
+
 };
 
 exports.serveIndex = function(req, res) {
@@ -224,12 +249,15 @@ exports.signUpUser = function(req, res) {
 exports.login = function(req, res) {
   console.log('login', req.url)
   var info = req.body;
+  console.log('login req.body: ', req.body);
   User.findOne({username: info.username}, function(err, user) {
     if(err) {
       console.log('server issue in db query for login');
       res.status(500).send({errorMessage: 'error in search of db upon login'});
     } 
     else if(user) {
+      console.log('from inside login, user: ', user);
+      console.log('password from login: ', info.password);
       user.comparePassword(info.password, function(err, match) {
         if(err) {
           console.log('error in comparison!', err);
@@ -259,14 +287,14 @@ exports.getBookings = function(req,res) {
   var info = req.bod;
   var user = req.session.user;
   utils.checkUser(req, res, function() {
-    Item.find({booker_id : user._id}, function (err, bookings) {
+    User.findOne({_id : user._id}, function (err, user) {
       if(err) { 
-        console.log('error in querying db for bookings', err);
+        console.log('error in querying db for user', err);
         res.status(500).send({errorMessage: 'error in querying db for bookings'});
       }
       else {
-        console.log('success in getting bookings');
-        res.status(200).send({results: bookings});
+        console.log('success in getting user');
+        res.status(200).send({results: user.bookings});
       }
     });
   });

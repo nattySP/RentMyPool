@@ -224,18 +224,20 @@ var Booking = React.createClass({
       reviews: [],
       errors: '',
       avgRating: 0,
-      date: new Date().toDateString().slice(4)
+      date: ''
     };
   },
 
-  // listen for when an entry is clicked
+  componentDidUpdate: function() {
+    $( "#bookDate" ).datepicker()
+      .on("input change", this.handleBookDate);
+  },
+  
   componentDidMount: function () {
     RentStore.addListener(RentConstants.ENTRY_CLICKED, this.handleEntryClicked);
     RentStore.addListener(RentConstants.REVIEW_SUBMITTED, this.refreshReviews);
     RentStore.addListener(RentConstants.NEW_REVIEW, this.handleNewReviews);
     RentStore.addRemoveDetailsListener(this.removeDetails);
-    $( "#bookDate" ).datepicker()
-      .on("input change", this.handleBookDate);
   },
 
   componentWillUnmount: function () {
@@ -256,7 +258,12 @@ var Booking = React.createClass({
       noDetails: false,
       rental: load
     }, function() { 
-        console.log(this.state.rental);
+        //convert date string to mo/day/year
+        // var date = '';
+        var date = new Date(); 
+        date = (date.getMonth() + 1).toString() + '/' + date.getDate().toString() + '/' + date.getFullYear().toString();
+        console.log('date string!!!!!! ', date);
+        this.state.rental.listing.date = date; 
         //get reviews
         RentActions.fetchReviews(this.state.rental.listing.user_id);
     });
@@ -268,8 +275,9 @@ var Booking = React.createClass({
       date: date
     },
       function () {
-        RentActions.filterChange(this.state);
-        RentActions.removeDetails(); 
+        this.state.rental.listing.date = this.state.date;
+        RentActions.setBookDate(this.state.rental.listing);
+        console.log('set state for book date, this.state.rental: ', this.state.rental); 
       }
     );
   },
@@ -381,7 +389,9 @@ var Booking = React.createClass({
 
 
       var bookingButton;
-      if(this.state.rental.listing.booker_id) {
+      if(!!this.state.rental.listing.calendar && !!this.state.rental.listing.calendar[this.state.date]) {
+        console.log('this listing has a calendar: ', this.state.rental.listing.calendar);
+        console.log('this.state.date from booking button: ', this.state.date);
         bookingButton = <button className="button">BOOKED</button>;
       } else {
         bookingButton = <button className="btn-link" onClick={this.handleBooking}>Book now</button>;
@@ -401,7 +411,6 @@ var Booking = React.createClass({
           <h4 className="h4book"> Pool Features </h4>
           <p className="h4book"> {poolFeatures} </p>
           <input type="text" id="bookDate" name="date" placeholder="Date" />
-          //put  a datepicker here, dont allow bookingButton to be clicked unless date is selected
           {bookingButton}
           <br />
           <br />
@@ -485,6 +494,7 @@ var GoogleMap = React.createClass({
   componentDidMount: function () {
     this.initializeMap();
     RentStore.addListener(RentConstants.ENTRY_CLICKED, this.handleEntryClicked);
+    RentStore.addListener(RentConstants.BOOK_DATE, this.updateDate);
   },
 
   componentWillUnmount: function () {
@@ -492,7 +502,13 @@ var GoogleMap = React.createClass({
   },
 
   handleEntryClicked: function (load) {
+    console.log('googleMap load: ', load)
     this.codeAddress(load.listing);
+  },
+
+  updateDate: function(load) {
+    console.log('updateDate load: ', load);
+    this.codeAddress(load);
   },
 
   codeAddress: function (data) {
@@ -506,7 +522,9 @@ var GoogleMap = React.createClass({
       this.address = /([a-zA-Z\s]+),\s([A-Z]{2})\s{0,1}/g.exec(results[0].formatted_address);
       this.address = [this.address[1].trim(),this.address[2]];
       // get day month year of listing
+      console.log('googleMap data: ', data);
       this.address.date = /(\d+)\/(\d+)\/(\d+)/g.exec(data.date);
+      console.log('this is this.address sent to sendCityState: ', this.address);
       // dispatch event for sending city/state data to weather component
       RentActions.sendCityState(this.address);
 
@@ -560,9 +578,10 @@ var Weather = React.createClass({
     RentStore.addListener(RentConstants.CITYSTATE, this.updateWeather);
   },
 
+
   updateWeather: function(data) {
     console.log('is the date here?? ',data)
-    //_getWeather(data[0], data[1], data.date[1], data.date[2], data.date[3], this.setState.bind(this));
+    _getWeather(data[0], data[1], data.date[1], data.date[2], data.date[3], this.setState.bind(this));
   },
 
   render: function() {

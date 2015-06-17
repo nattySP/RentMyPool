@@ -14,6 +14,7 @@ var ConfirmationContent = React.createClass({
       method: "GET",
       statusCode: {
         200: function (data) {
+          console.log('confirmation data: ', data);
             self.setState({
               bookings: data.results
             });

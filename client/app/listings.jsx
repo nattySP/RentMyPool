@@ -23,8 +23,11 @@ var ListContent = React.createClass({
   },
 
   componentDidMount: function () {
-    $( "#datepicker" ).datepicker();
     AppActions.fetchUser();
+  },
+
+  componentWillUpdate: function() {
+    $( "#datepicker" ).datepicker();
   },
 
   componentWillUnmount: function () {
@@ -100,7 +103,7 @@ var ListContent = React.createClass({
   handleSubmit: function (e) {
     var $form = $("#listingForm")[0];
 
-    if ($form.name.value && $form.address.value && $form.price.value && $form.date.value && $form.userPhoto.files[0]) {
+    if ($form.name.value && $form.address.value && $form.price.value && $form.userPhoto.files[0]) {
       this.setState({
         name: $form.name.value,
         address: $form.address.value,

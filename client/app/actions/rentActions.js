@@ -24,6 +24,7 @@ var RentActions = {
   },
 
   newBooking: function (data) {
+    console.log('newBooking data: ', data);
     RentDispatcher.dispatch({
       type: RentConstants.NEW_BOOKING,
       load: data
@@ -64,6 +65,13 @@ var RentActions = {
       type: RentConstants.CITYSTATE,
       load: data
     });
+  },
+
+  setBookDate: function (data) {
+    RentDispatcher.dispatch({
+      type: RentConstants.BOOK_DATE,
+      load: data
+    })
   }
 
 }

@@ -5,7 +5,8 @@ var userSchema = mongoose.Schema({
     username : { type: String, required:  true, unique: true },
     password : { type:String, required: true},
     reviews: Array,
-    avgRating: Number //averaged from star rating values
+    avgRating: Number, 
+    bookings: Array //averaged from star rating values
     //info on user
     // - email
     // - firstName
@@ -15,11 +16,14 @@ var userSchema = mongoose.Schema({
 var User = mongoose.model('User', userSchema);
 
 User.prototype.comparePassword = function(attemptedPassword, callback) {
-  bcrypt.compare(attemptedPassword, this.get('password'), function(err, isMatch) {
+  var realPassword = this.get('password');
+  console.log('attemptedPassword: ', attemptedPassword);
+  bcrypt.compare(attemptedPassword, this.password, function(err, isMatch) {
     if(err) { 
         console.log('error in password compare!');
         callback(err);
     }
+    console.log('comparePassword isMatch: ', isMatch);
     callback(null, isMatch);
   });
 };
